@@ -1,232 +1,439 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#fff0a8">
-  <title>Potato Panic!!!</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Potato Panic Deluxe</title>
   <style>
     :root {
-      color-scheme: light;
-      font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
-      background: #fff0a8;
-      color: #38244f;
+      --bg1: #ffef9e;
+      --bg2: #ffd0db;
+      --bg3: #d9f7ff;
+      --card: #fffdf5;
+      --ink: #2f1d3a;
+      --grass: #9ae6b4;
+      --pink: #ff6d8a;
+      --blue: #5bc0ff;
+      --purple: #8b5cf6;
+      --yellow: #ffd166;
+      --green: #6ee7b7;
+      --shadow: #2f1d3a;
     }
 
     * { box-sizing: border-box; }
 
-    body {
-      min-height: 100vh;
+    html, body {
       margin: 0;
+      min-height: 100%;
+      font-family: "Comic Sans MS", "Trebuchet MS", sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.8), transparent 20%),
+        linear-gradient(180deg, var(--bg1), var(--bg2) 38%, var(--bg3));
+      color: var(--ink);
+    }
+
+    body {
       display: grid;
       place-items: center;
       padding: 20px;
-      background: repeating-linear-gradient(135deg, #fff0a8 0 24px, #ffe98c 24px 48px);
     }
 
     .game {
-      width: min(680px, 100%);
-      padding: clamp(20px, 5vw, 40px);
-      text-align: center;
-      background: #fffdf4;
-      border: 5px solid #38244f;
-      border-radius: 28px;
-      box-shadow: 10px 10px 0 #38244f;
+      width: min(760px, 100%);
+      background: rgba(255, 255, 255, 0.6);
+      border: 5px solid var(--shadow);
+      border-radius: 34px;
+      box-shadow: 12px 12px 0 var(--shadow);
+      padding: 24px 20px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game::before,
+    .game::after {
+      content: "";
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+      z-index: 0;
+    }
+
+    .game::before { top: -42px; left: -48px; }
+    .game::after { right: -40px; bottom: -44px; }
+
+    .inner {
+      position: relative;
+      z-index: 1;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(2.4rem, 9vw, 5rem);
-      line-height: .95;
-      transform: rotate(-2deg);
-      text-shadow: 3px 3px #ff8f9c;
+      text-align: center;
+      font-size: clamp(2.2rem, 7vw, 4.7rem);
+      line-height: 0.9;
+      letter-spacing: 0.04em;
+      transform: rotate(-3deg);
+      text-shadow: 4px 4px 0 var(--yellow);
     }
 
-    .subtitle { margin: 18px 0 24px; font-size: 1.15rem; }
+    .subtitle {
+      text-align: center;
+      margin: 10px 0 18px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #4f355a;
+    }
 
     .stats {
       display: flex;
       justify-content: center;
-      gap: 12px;
+      gap: 10px;
       flex-wrap: wrap;
-      margin: 0 0 16px;
+      margin-bottom: 18px;
     }
 
     .stat {
-      min-width: 115px;
-      padding: 10px 16px;
-      background: #d7f6bd;
-      border: 3px solid #38244f;
-      border-radius: 14px;
+      min-width: 120px;
+      padding: 10px 14px;
+      border: 3px solid var(--shadow);
+      border-radius: 18px;
+      background: var(--card);
+      text-align: center;
       font-weight: 800;
+      box-shadow: 4px 4px 0 rgba(47,29,58,0.14);
     }
 
-    .stat span { display: block; font-size: 1.5rem; }
+    .stat .label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+
+    .stat .value {
+      display: block;
+      font-size: clamp(1.4rem, 3vw, 2.1rem);
+      margin-top: 5px;
+    }
 
     .arena {
       position: relative;
-      height: 290px;
+      height: 340px;
+      background:
+        linear-gradient(to bottom, #d8f5ff 0%, #d8f5ff 65%, var(--grass) 65%, var(--grass) 100%);
+      border: 4px dashed var(--shadow);
+      border-radius: 24px;
       overflow: hidden;
-      border: 4px dashed #38244f;
-      border-radius: 20px;
-      background: #d5f5ff;
-      isolation: isolate;
+      box-shadow: inset 0 -12px 0 rgba(0,0,0,0.08);
     }
 
-    .arena::after {
+    .sun {
       position: absolute;
-      right: 12px;
-      bottom: 8px;
-      content: "the potato is absolutely up to something";
-      color: #62788a;
-      font-size: .75rem;
-      pointer-events: none;
+      top: 22px;
+      right: 28px;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: #ffe66d;
+      border: 4px solid var(--shadow);
     }
 
-    button { font: inherit; cursor: pointer; touch-action: manipulation; }
-
-    .start {
-      margin: 18px 0 0;
-      padding: 13px 24px;
-      color: white;
-      background: #fa5674;
-      border: 3px solid #38244f;
-      border-radius: 14px;
-      box-shadow: 4px 4px 0 #38244f;
-      font-size: 1.2rem;
-      font-weight: 900;
+    .cloud {
+      position: absolute;
+      width: 110px;
+      height: 36px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.8);
+      border: 3px solid var(--shadow);
+      top: 24px;
+      left: 22px;
+      opacity: 0.8;
     }
 
-    .start:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #38244f; }
-    .start:focus-visible, .potato:focus-visible { outline: 4px solid #1477cc; outline-offset: 4px; }
+    .cloud::before, .cloud::after {
+      content: "";
+      position: absolute;
+      background: rgba(255,255,255,0.8);
+      border: 3px solid var(--shadow);
+      border-radius: 50%;
+    }
+
+    .cloud::before {
+      width: 36px;
+      height: 36px;
+      left: 16px;
+      top: -18px;
+    }
+
+    .cloud::after {
+      width: 48px;
+      height: 48px;
+      right: 20px;
+      top: -24px;
+    }
+
+    .cloud.two {
+      left: auto;
+      right: 120px;
+      top: 70px;
+      transform: scale(0.9);
+    }
 
     .potato {
       position: absolute;
-      left: 50%;
-      top: 50%;
       display: none;
-      width: 92px;
-      height: 92px;
-      padding: 0;
+      width: 90px;
+      height: 90px;
       border: 0;
-      border-radius: 48% 52% 43% 57%;
       background: transparent;
-      font-size: 4.7rem;
+      font-size: 4.2rem;
       line-height: 1;
-      transform: translate(-50%, -50%) rotate(-12deg);
-      filter: drop-shadow(3px 4px 0 #70422d);
-      animation: wobble .32s infinite alternate ease-in-out;
+      cursor: pointer;
+      user-select: none;
+      filter: drop-shadow(4px 5px 0 rgba(80,44,24,0.85));
+      transition: transform 0.08s ease;
+      animation: wobble 0.38s ease-in-out infinite alternate;
     }
 
     .potato.visible { display: block; }
-    .potato:active { scale: .8; }
+    .potato:active { transform: scale(0.88); }
 
-    @keyframes wobble {
-      from { rotate: -9deg; }
-      to { rotate: 10deg; }
+    .potato.bonked {
+      animation: pop 0.22s ease forwards;
     }
 
-    .message { min-height: 1.6em; margin: 14px 0 0; font-weight: 700; }
-    .instructions { margin: 14px 0 0; color: #685b76; font-size: .92rem; }
+    @keyframes wobble {
+      from { transform: rotate(-16deg) scale(1); }
+      to { transform: rotate(14deg) scale(1.05); }
+    }
 
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    @keyframes pop {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(1.5); opacity: 0; }
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      margin-top: 18px;
+    }
+
+    button.start {
+      border: 4px solid var(--shadow);
+      background: linear-gradient(180deg, #ff7d90, #ff4f73);
+      color: white;
+      font: inherit;
+      font-size: 1.2rem;
+      font-weight: 900;
+      padding: 14px 22px;
+      border-radius: 18px;
+      box-shadow: 6px 6px 0 var(--shadow);
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease;
+    }
+
+    button.start:active {
+      transform: translate(4px, 4px);
+      box-shadow: 2px 2px 0 var(--shadow);
+    }
+
+    button.start:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+
+    .message {
+      min-height: 1.5em;
+      margin: 16px 0 0;
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #443b5e;
+    }
+
+    .hint {
+      margin-top: 8px;
+      text-align: center;
+      color: #5a3e70;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    @media (max-width: 540px) {
+      .game { padding: 18px 14px 16px; }
+      .arena { height: 290px; }
+      .potato { width: 76px; height: 76px; font-size: 3.6rem; }
+      .stat { min-width: 100px; }
     }
   </style>
 </head>
 <body>
   <main class="game">
-    <h1>🥔 POTATO<br>PANIC!!!</h1>
-    <p class="subtitle">A potato is loose. This is your problem now.</p>
+    <div class="inner">
+      <h1>🥔 POTATO<br />PANIC!</h1>
+      <div class="subtitle">The potato is angry. The potato is also ridiculous.</div>
 
-    <section class="stats" aria-label="Game stats">
-      <div class="stat">BONKS<span id="score" aria-live="polite">0</span></div>
-      <div class="stat">TIME<span id="time" aria-live="off">15</span></div>
-      <div class="stat">VIBE<span id="vibe">OKAY</span></div>
-    </section>
+      <div class="stats" aria-label="Game stats">
+        <div class="stat">
+          <span class="label">Bonks</span>
+          <span class="value" id="score">0</span>
+        </div>
+        <div class="stat">
+          <span class="label">Time</span>
+          <span class="value" id="time">15</span>
+        </div>
+        <div class="stat">
+          <span class="label">Mood</span>
+          <span class="value" id="mood">OKAY</span>
+        </div>
+      </div>
 
-    <div class="arena" id="arena" aria-label="Game area">
-      <button class="potato" id="potato" type="button" aria-label="Bonk the potato">🥔</button>
+      <div class="arena" id="arena" aria-label="Potato arena">
+        <div class="sun" aria-hidden="true"></div>
+        <div class="cloud" aria-hidden="true"></div>
+        <div class="cloud two" aria-hidden="true"></div>
+        <button class="potato" id="potato" type="button" aria-label="Bonk the potato">🥔</button>
+      </div>
+
+      <div class="controls">
+        <button class="start" id="startBtn" type="button">START THE ABSURDITY</button>
+      </div>
+
+      <div class="message" id="message" role="status">Tap the button. Bonk the potato. Save the dignity of all spuds.</div>
+      <div class="hint">You have 15 seconds. Zero skill. Full chaos.</div>
     </div>
-
-    <button class="start" id="start" type="button">START THE NONSENSE</button>
-    <p class="message" id="message" role="status">Press the big button. Tap the potato. Become a legend.</p>
-    <p class="instructions">You have 15 seconds. No skill required. Potato has no lawyer.</p>
   </main>
 
   <script>
-    const arena = document.querySelector('#arena');
-    const potato = document.querySelector('#potato');
-    const startButton = document.querySelector('#start');
-    const scoreDisplay = document.querySelector('#score');
-    const timeDisplay = document.querySelector('#time');
-    const vibeDisplay = document.querySelector('#vibe');
-    const message = document.querySelector('#message');
-
-    const sillyMessages = [
-      'BONK! The potato has filed a complaint.',
-      'Incredible. A potato has been mildly inconvenienced.',
-      'The potato says: rude. The potato is also a potato.',
-      'BONK! Your hand is now a potato expert.',
-      'The crowd goes: huh? (There is no crowd.)',
-      'A devastating blow to potato morale!',
-      'You are doing great. The potato is not.',
-      'BONK! Somewhere, a french fry shudders.'
-    ];
+    const arena = document.getElementById('arena');
+    const potato = document.getElementById('potato');
+    const message = document.getElementById('message');
+    const scoreEl = document.getElementById('score');
+    const timeEl = document.getElementById('time');
+    const moodEl = document.getElementById('mood');
+    const startBtn = document.getElementById('startBtn');
 
     let score = 0;
     let timeLeft = 15;
-    let timerId;
-    let playing = false;
+    let timer = null;
+    let gameRunning = false;
+    let audioCtx = null;
 
-    function movePotato() {
-      const padding = 52;
-      const maxX = Math.max(padding, arena.clientWidth - padding);
-      const maxY = Math.max(padding, arena.clientHeight - padding);
-      potato.style.left = `${padding + Math.random() * (maxX - padding)}px`;
-      potato.style.top = `${padding + Math.random() * (maxY - padding)}px`;
+    const messages = [
+      'BONK! A tiny potato legend is born.',
+      'That was deliciously rude.',
+      'The potato has entered its dramatic phase.',
+      'A perfect bonk. The spud is deeply offended.',
+      'You are now certified in potato abuse.',
+      'That hit the weak spot: the potato soul.',
+      'The crowd is silent. The crowd is imaginary.',
+      'Excellent. The potato is absolutely furious.'
+    ];
+
+    function ensureAudio() {
+      if (!audioCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) audioCtx = new AudioCtx();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function beep(freq, duration, volume = 0.05, type = 'square') {
+      if (!audioCtx) return;
+      const oscillator = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      oscillator.type = type;
+      oscillator.frequency.value = freq;
+      gain.gain.value = volume;
+      oscillator.connect(gain);
+      gain.connect(audioCtx.destination);
+      oscillator.start();
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+      oscillator.stop(audioCtx.currentTime + duration);
+    }
+
+    function randomPotatoPosition() {
+      const padding = 40;
+      const marginX = arena.clientWidth - 100;
+      const marginY = arena.clientHeight - 100;
+      const x = padding + Math.random() * Math.max(0, marginX - padding);
+      const y = padding + Math.random() * Math.max(0, marginY - padding);
+      potato.style.left = `${x}px`;
+      potato.style.top = `${y}px`;
+    }
+
+    function showPotato() {
+      potato.classList.add('visible');
+      randomPotatoPosition();
+    }
+
+    function hidePotato() {
+      potato.classList.remove('visible');
+      potato.classList.remove('bonked');
+    }
+
+    function updateMood() {
+      if (score >= 18) moodEl.textContent = 'GOD';
+      else if (score >= 10) moodEl.textContent = 'WILD';
+      else if (score >= 5) moodEl.textContent = 'SPUDDY';
+      else moodEl.textContent = 'OKAY';
     }
 
     function finishGame() {
-      playing = false;
-      clearInterval(timerId);
-      potato.classList.remove('visible');
-      startButton.disabled = false;
-      startButton.textContent = 'PLAY AGAIN (WHY NOT)';
-      vibeDisplay.textContent = score >= 15 ? 'POTATO GOD' : score >= 8 ? 'SPUD STAR' : 'POTATO';
-      message.textContent = `Time's up! You bonked ${score} potato${score === 1 ? '' : 'es'}. The potato will remember.`;
+      gameRunning = false;
+      clearInterval(timer);
+      hidePotato();
+      startBtn.disabled = false;
+      startBtn.textContent = 'PLAY AGAIN, DUMBO';
+      const result = score >= 12 ? 'You are officially a potato wizard.' : 'You are definitely weird, and the potato knows it.';
+      message.textContent = `Time's up! You bonked ${score} potato${score === 1 ? '' : 'es'}. ${result}`;
+      moodEl.textContent = score >= 15 ? 'LEGEND' : 'WEIRD';
+      beep(220, 0.18, 0.06, 'sawtooth');
+      setTimeout(() => beep(160, 0.24, 0.06, 'triangle'), 120);
     }
 
     function startGame() {
-      clearInterval(timerId);
+      ensureAudio();
       score = 0;
       timeLeft = 15;
-      playing = true;
-      scoreDisplay.textContent = score;
-      timeDisplay.textContent = timeLeft;
-      vibeDisplay.textContent = 'GO!!!';
-      message.textContent = 'GO GO GO! BONK THAT SPUD!';
-      startButton.disabled = true;
-      startButton.textContent = 'BONKING...';
-      potato.classList.add('visible');
-      movePotato();
-      timerId = setInterval(() => {
+      scoreEl.textContent = score;
+      timeEl.textContent = timeLeft;
+      moodEl.textContent = 'GO!!!';
+      gameRunning = true;
+      startBtn.disabled = true;
+      startBtn.textContent = 'BONKING...';
+      message.textContent = 'GO! BONK THE SPUD BEFORE IT GETS IDEAS!';
+      showPotato();
+
+      clearInterval(timer);
+      timer = setInterval(() => {
         timeLeft -= 1;
-        timeDisplay.textContent = timeLeft;
-        if (timeLeft <= 0) finishGame();
+        timeEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          finishGame();
+        }
       }, 1000);
     }
 
     potato.addEventListener('click', () => {
-      if (!playing) return;
+      if (!gameRunning) return;
+
       score += 1;
-      scoreDisplay.textContent = score;
-      vibeDisplay.textContent = score >= 15 ? 'ZOOMY' : score >= 8 ? 'SPUDDY' : 'OKAY';
-      message.textContent = sillyMessages[Math.floor(Math.random() * sillyMessages.length)];
-      movePotato();
+      scoreEl.textContent = score;
+      updateMood();
+      message.textContent = messages[Math.floor(Math.random() * messages.length)];
+      potato.classList.add('bonked');
+      beep(480 + score * 18, 0.08, 0.06, 'square');
+      setTimeout(() => {
+        potato.classList.remove('bonked');
+        showPotato();
+      }, 90);
     });
 
-    startButton.addEventListener('click', startGame);
+    startBtn.addEventListener('click', startGame);
   </script>
 </body>
 </html>
