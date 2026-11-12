@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fff0a8">
+  <title>Potato Panic!!!</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif;
+      background: #fff0a8;
+      color: #38244f;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: repeating-linear-gradient(135deg, #fff0a8 0 24px, #ffe98c 24px 48px);
+    }
+
+    .game {
+      width: min(680px, 100%);
+      padding: clamp(20px, 5vw, 40px);
+      text-align: center;
+      background: #fffdf4;
+      border: 5px solid #38244f;
+      border-radius: 28px;
+      box-shadow: 10px 10px 0 #38244f;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.4rem, 9vw, 5rem);
+      line-height: .95;
+      transform: rotate(-2deg);
+      text-shadow: 3px 3px #ff8f9c;
+    }
+
+    .subtitle { margin: 18px 0 24px; font-size: 1.15rem; }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 0 0 16px;
+    }
+
+    .stat {
+      min-width: 115px;
+      padding: 10px 16px;
+      background: #d7f6bd;
+      border: 3px solid #38244f;
+      border-radius: 14px;
+      font-weight: 800;
+    }
+
+    .stat span { display: block; font-size: 1.5rem; }
+
+    .arena {
+      position: relative;
+      height: 290px;
+      overflow: hidden;
+      border: 4px dashed #38244f;
+      border-radius: 20px;
+      background: #d5f5ff;
+      isolation: isolate;
+    }
+
+    .arena::after {
+      position: absolute;
+      right: 12px;
+      bottom: 8px;
+      content: "the potato is absolutely up to something";
+      color: #62788a;
+      font-size: .75rem;
+      pointer-events: none;
+    }
+
+    button { font: inherit; cursor: pointer; touch-action: manipulation; }
+
+    .start {
+      margin: 18px 0 0;
+      padding: 13px 24px;
+      color: white;
+      background: #fa5674;
+      border: 3px solid #38244f;
+      border-radius: 14px;
+      box-shadow: 4px 4px 0 #38244f;
+      font-size: 1.2rem;
+      font-weight: 900;
+    }
+
+    .start:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #38244f; }
+    .start:focus-visible, .potato:focus-visible { outline: 4px solid #1477cc; outline-offset: 4px; }
+
+    .potato {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      display: none;
+      width: 92px;
+      height: 92px;
+      padding: 0;
+      border: 0;
+      border-radius: 48% 52% 43% 57%;
+      background: transparent;
+      font-size: 4.7rem;
+      line-height: 1;
+      transform: translate(-50%, -50%) rotate(-12deg);
+      filter: drop-shadow(3px 4px 0 #70422d);
+      animation: wobble .32s infinite alternate ease-in-out;
+    }
+
+    .potato.visible { display: block; }
+    .potato:active { scale: .8; }
+
+    @keyframes wobble {
+      from { rotate: -9deg; }
+      to { rotate: 10deg; }
+    }
+
+    .message { min-height: 1.6em; margin: 14px 0 0; font-weight: 700; }
+    .instructions { margin: 14px 0 0; color: #685b76; font-size: .92rem; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="game">
+    <h1>🥔 POTATO<br>PANIC!!!</h1>
+    <p class="subtitle">A potato is loose. This is your problem now.</p>
+
+    <section class="stats" aria-label="Game stats">
+      <div class="stat">BONKS<span id="score" aria-live="polite">0</span></div>
+      <div class="stat">TIME<span id="time" aria-live="off">15</span></div>
+      <div class="stat">VIBE<span id="vibe">OKAY</span></div>
+    </section>
+
+    <div class="arena" id="arena" aria-label="Game area">
+      <button class="potato" id="potato" type="button" aria-label="Bonk the potato">🥔</button>
+    </div>
+
+    <button class="start" id="start" type="button">START THE NONSENSE</button>
+    <p class="message" id="message" role="status">Press the big button. Tap the potato. Become a legend.</p>
+    <p class="instructions">You have 15 seconds. No skill required. Potato has no lawyer.</p>
+  </main>
+
+  <script>
+    const arena = document.querySelector('#arena');
+    const potato = document.querySelector('#potato');
+    const startButton = document.querySelector('#start');
+    const scoreDisplay = document.querySelector('#score');
+    const timeDisplay = document.querySelector('#time');
+    const vibeDisplay = document.querySelector('#vibe');
+    const message = document.querySelector('#message');
+
+    const sillyMessages = [
+      'BONK! The potato has filed a complaint.',
+      'Incredible. A potato has been mildly inconvenienced.',
+      'The potato says: rude. The potato is also a potato.',
+      'BONK! Your hand is now a potato expert.',
+      'The crowd goes: huh? (There is no crowd.)',
+      'A devastating blow to potato morale!',
+      'You are doing great. The potato is not.',
+      'BONK! Somewhere, a french fry shudders.'
+    ];
+
+    let score = 0;
+    let timeLeft = 15;
+    let timerId;
+    let playing = false;
+
+    function movePotato() {
+      const padding = 52;
+      const maxX = Math.max(padding, arena.clientWidth - padding);
+      const maxY = Math.max(padding, arena.clientHeight - padding);
+      potato.style.left = `${padding + Math.random() * (maxX - padding)}px`;
+      potato.style.top = `${padding + Math.random() * (maxY - padding)}px`;
+    }
+
+    function finishGame() {
+      playing = false;
+      clearInterval(timerId);
+      potato.classList.remove('visible');
+      startButton.disabled = false;
+      startButton.textContent = 'PLAY AGAIN (WHY NOT)';
+      vibeDisplay.textContent = score >= 15 ? 'POTATO GOD' : score >= 8 ? 'SPUD STAR' : 'POTATO';
+      message.textContent = `Time's up! You bonked ${score} potato${score === 1 ? '' : 'es'}. The potato will remember.`;
+    }
+
+    function startGame() {
+      clearInterval(timerId);
+      score = 0;
+      timeLeft = 15;
+      playing = true;
+      scoreDisplay.textContent = score;
+      timeDisplay.textContent = timeLeft;
+      vibeDisplay.textContent = 'GO!!!';
+      message.textContent = 'GO GO GO! BONK THAT SPUD!';
+      startButton.disabled = true;
+      startButton.textContent = 'BONKING...';
+      potato.classList.add('visible');
+      movePotato();
+      timerId = setInterval(() => {
+        timeLeft -= 1;
+        timeDisplay.textContent = timeLeft;
+        if (timeLeft <= 0) finishGame();
+      }, 1000);
+    }
+
+    potato.addEventListener('click', () => {
+      if (!playing) return;
+      score += 1;
+      scoreDisplay.textContent = score;
+      vibeDisplay.textContent = score >= 15 ? 'ZOOMY' : score >= 8 ? 'SPUDDY' : 'OKAY';
+      message.textContent = sillyMessages[Math.floor(Math.random() * sillyMessages.length)];
+      movePotato();
+    });
+
+    startButton.addEventListener('click', startGame);
+  </script>
+</body>
+</html>
